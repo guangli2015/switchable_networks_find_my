@@ -1,0 +1,347 @@
+#
+# Copyright (c) 2021 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+config FMNA
+	bool "Enable FMN Accessory Development Kit"
+	select BT
+	select BT_PERIPHERAL
+	select BT_SMP
+	select BT_SMP_APP_PAIRING_ACCEPT
+	select BT_EXT_ADV
+	select BT_TPS
+	imply BT_CONN_TX_NOTIFY_WQ if SOC_FLASH_NRF_RADIO_SYNC_MPSL
+
+	select BT_SETTINGS
+	select FLASH
+	select FLASH_MAP
+	imply ZMS if SOC_FLASH_NRF_RRAM || SOC_FLASH_NRF_MRAM
+	imply NVS if !(SOC_FLASH_NRF_RRAM || SOC_FLASH_NRF_MRAM)
+	select SETTINGS
+
+	select APP_EVENT_MANAGER
+	help
+	  Find My stack conditionally implies the BT_CONN_TX_NOTIFY_WQ Kconfig
+	  option that configures a separate workqueue for connection TX notify
+	  processing. This is done to work around the MPSL flash synchronization
+	  timeout known issue (NCSDK-29354).
+
+if FMNA
+
+config FMNA_CRYPTO
+	bool
+	default y
+	select ENTROPY_GENERATOR
+	select NRF_OBERON
+
+config FMNA_QUALIFICATION
+	bool "Enable qualification capabilities used by the FMCA app"
+	select REBOOT
+
+config FMNA_MAX_CONN
+	int "Maximum number of FMN connections"
+	default 2
+	range 2 BT_MAX_CONN
+
+config FMNA_CONN_SECURITY_TIMEOUT
+	int "Timeout in seconds to secure the Find My Bluetooth connection"
+	default 10
+	help
+	  Override the default timeout to secure the Find My Bluetooth
+	  connection. Please note that changes to this configuration are highly
+	  discouraged since the specification requires a 10-second timeout.
+
+	  The Bluetooth peer connecting to the FMN accessory has a predefined
+	  time to encrypt the Bluetooth link. After a timeout, the accessory
+	  terminates an unencrypted connection.
+
+	  Setting this configuration option to 0 disables this functionality.
+
+config FMNA_TX_POWER
+	int "TX power in dBm"
+	help
+	  TX power configuration in dBm used in advertising and connections.
+	  Please note that the desired configuration may be different from the
+	  actual one if a chosen HW platform does not support it. In this case,
+	  the Find My stack displays a warning notifying the user about the
+	  real TX power during the enabling procedure of this library. The
+	  actual TX power value will be as close to the desired configuration
+	  as possible.
+	default 4
+	range 4 8
+
+config FMNA_BT_BOND_CLEAR
+	bool "Clear Find My peers bond data during the enabling process"
+	help
+	  Clear bond data of the Find My peers in the Bluetooth stack during
+	  the fmna_enable API call. All bonding information (keys, ccc, sc, cf)
+	  related to the configured Find My identity are removed. This
+	  configuration can be used to remove pollution of the settings area
+	  with unused data that occured in certain edge cases in the past
+	  nRF Connect SDK releases (v2.3.0 and all releases before that). This
+	  option is disabled by default as it is not needed for the nRF Connect
+	  SDK v2.4.0 release and beyond. In the newest firmware, the Find My
+	  connection is no longer associated with any bonding information
+	  and settings pollution should not happen.
+
+config FMNA_CUSTOM_SERIAL_NUMBER
+	bool "Use custom serial number from provisioned data"
+
+config FMNA_HWINFO_SERIAL_NUMBER
+	bool
+	depends on !FMNA_CUSTOM_SERIAL_NUMBER
+	default y
+	select HWINFO
+	help
+	  Generate the serial number using the Zephyr HWINFO driver and its
+	  fmna_serial_number_get API function.
+
+config FMNA_SERVICE_HIDDEN_MODE
+	bool "Hide the Find My services in the disabled state"
+	select BT_GATT_SERVICE_CHANGED
+	select BT_GATT_DYNAMIC_DB
+	help
+	  Have the FMN, AIS and Firmware Update services registered in the
+	  Bluetooth GATT database only when the Find My stack is enabled.
+	  In the disabled state, these services will not be visible to the
+	  connected peers.
+
+choice FMNA_LOG_MFI_AUTH_TOKEN_FORMAT
+	prompt "Log MFi Authentication Token format"
+	depends on LOG
+	default FMNA_LOG_MFI_AUTH_TOKEN_BASE64_SHORT
+
+config FMNA_LOG_MFI_AUTH_TOKEN_HEX_SHORT
+	bool "Log first 16 bytes MFi Authentication Token in standard hex format"
+
+config FMNA_LOG_MFI_AUTH_TOKEN_HEX_FULL
+	bool "Log full MFi Authentication Token with trimmed trailing zeros in standard hex format"
+
+config FMNA_LOG_MFI_AUTH_TOKEN_BASE64_SHORT
+	bool "Log first and last 16 characters of MFi Authentication Token in Base64 encoded format"
+	select BASE64
+
+config FMNA_LOG_MFI_AUTH_TOKEN_BASE64_FULL
+	bool "Log full MFi Authentication Token in Base64 encoded format"
+	select BASE64
+
+endchoice
+
+# Product Plan configuration
+config FMNA_NORDIC_PRODUCT_PLAN
+	bool "Use Nordic Product Plan"
+
+# Pairing mode configuration
+config FMNA_PAIRING_MODE_TIMEOUT
+	int "Timeout for the pairing mode in seconds"
+	default 600
+	help
+	  Override the default timeout for the pairing mode. Please note
+	  that changes to this configuration are highly discouraged since
+	  the specification requires a 10-minute timeout (or 600 seconds).
+
+	  Set this option to zero in case you do not want to use the Find My
+	  stack timeout feature. In this case, you need to use the pairing mode
+	  management APIs: fmna_pairing_mode_enter and fmna_pairing_mode_cancel
+	  to implement your custom pairing mode policy.
+
+config FMNA_PAIRING_MODE_AUTO_ENTER
+	bool "Automatically enter the Find My pairing mode"
+	default y
+	help
+	  Use this option to automatically enter the Find My pairing mode and
+	  to start the pairing mode advertising when the FMN stack transitions
+	  to the unpaired state. With this configuration option disabled, you
+	  need to call the fmna_pairing_mode_enter API to enter the pairing
+	  mode in the aforementioned scenarios. Having this option disabled
+	  may become handy to implement more elaborate pairing mode policies
+	  that require the user to take certain action before the pairing mode
+	  is activated on the device (e.g. button press).
+
+config FMNA_BT_PAIRING_NO_BONDING
+	bool
+	default y
+	select BT_BONDABLE_PER_CONNECTION
+	help
+	  Set the bonding flags to "No Bonding" for the Bluetooth LE Just Works
+	  pairing scheme that is the initial step of the complete Find My
+	  pairing flow.
+	  The "No Bonding" mode is especially important for the pair before use
+	  accessories. These types of accessories usually bond using their main
+	  Bluetooth application identity and prevent the Find My pairing flow
+	  in the "Bonding" mode from succeeding. In this case, the Find My
+	  pairing fails as the Zephyr Bluetooth Host cannot store more than one
+	  bond for the same peer (identified by the Identity Address).
+
+# AIS configuration
+menu "Accessory Information Service (AIS)"
+
+config FMNA_MANUFACTURER_NAME
+	string "FMN Accessory Manufacturer Name"
+	default "Manufacturer"
+
+config FMNA_MODEL_NAME
+	string "FMN Accessory Model Name"
+	default "Model"
+
+config FMNA_CATEGORY
+	int "FMN Accessory Category"
+	range 1 167
+	default 128
+
+config FMNA_CAPABILITY_PLAY_SOUND_ENABLED
+	bool "FMN Accessory Capability: declare sound playing capability"
+
+config FMNA_CAPABILITY_DETECT_MOTION_ENABLED
+	depends on FMNA_CAPABILITY_PLAY_SOUND_ENABLED
+	bool "FMN Accessory Capability: declare motion detecting capability"
+
+config FMNA_CAPABILITY_NFC_SN_LOOKUP_ENABLED
+	bool "FMN Accessory Capability: declare Serial Number NFC lookup capability"
+
+config FMNA_CAPABILITY_BLE_SN_LOOKUP_ENABLED
+	bool "FMN Accessory Capability: declare Serial Number BLE lookup capability"
+
+config FMNA_CAPABILITY_FW_UPDATE_ENABLED
+	bool "FMN Accessory Capability: declare Firmware Update Service capability"
+	depends on BOOTLOADER_MCUBOOT
+
+choice FMNA_BATTERY_TYPE
+	prompt "FMN Accessory battery type"
+	default FMNA_BATTERY_TYPE_POWERED
+
+config FMNA_BATTERY_TYPE_POWERED
+	bool "Powered"
+
+config FMNA_BATTERY_TYPE_NON_RECHARGEABLE
+	bool "Non-rechargeable battery"
+
+config FMNA_BATTERY_TYPE_RECHARGEABLE
+	bool "Rechargeable battery"
+
+endchoice
+
+endmenu
+
+# Battery Level thresholds
+config FMNA_BATTERY_STATE_CRITICAL_THR
+	int "Battery level threshold [%] for entering critical battery state"
+	range 0 100
+	default 10
+
+config FMNA_BATTERY_STATE_LOW_THR
+	int "Battery level threshold [%] for entering low battery state"
+	range 0 100
+	default 40
+
+config FMNA_BATTERY_STATE_MEDIUM_THR
+	int "Battery level threshold [%] for entering medium battery state"
+	range 0 100
+	default 80
+
+# NFC configuration
+config FMNA_NFC
+	bool
+	depends on FMNA_CAPABILITY_NFC_SN_LOOKUP_ENABLED
+	default y
+	select NFC_T2T_NRFXLIB
+	select NFC_NDEF
+	select NFC_NDEF_MSG
+	select NFC_NDEF_RECORD
+	select NFC_NDEF_URI_REC
+	select NFC_NDEF_URI_MSG
+	help
+	  Enable NFC support.
+
+config FMNA_FIRMWARE_VERSION_CUSTOM
+	bool
+	default y if !FMNA_UARP
+	help
+	  Use a custom FMNA firmware version if the native Find My DFU solution (UARP) is disabled.
+
+if FMNA_FIRMWARE_VERSION_CUSTOM
+
+menu "Firmware version"
+
+config FMNA_FIRMWARE_VERSION_MAJOR
+	int "FMNA Firmware major version"
+	default 1
+	range 0 65535
+
+config FMNA_FIRMWARE_VERSION_MINOR
+	int "FMNA Firmware major version"
+	default 0
+	range 0 255
+
+config FMNA_FIRMWARE_VERSION_REVISION
+	int "FMNA Firmware revision version"
+	default 0
+	range 0 255
+
+endmenu
+
+endif # FMNA_FIRMWARE_VERSION_CUSTOM
+
+# Override default BLE configuration
+
+config BT_DEVICE_NAME
+	default "Nordic_FMN"
+
+config BT_L2CAP_TX_MTU
+	default 247
+
+config BT_BUF_ACL_RX_SIZE
+	default 251
+
+config BT_BUF_ACL_TX_SIZE
+	default 251
+
+config BT_CTLR_DATA_LENGTH_MAX
+	default 251
+
+config BT_CTLR_TX_PWR_DYNAMIC_CONTROL
+	default y
+
+config BT_ID_MAX
+	default 2
+
+config BT_MAX_CONN
+	default 2
+
+config BT_MAX_PAIRED
+	default FMNA_MAX_CONN
+
+config BT_GATT_SERVICE_CHANGED
+	default n
+
+config BT_PERIPHERAL_PREF_TIMEOUT
+	default 100
+
+config BT_CONN_PARAM_UPDATE_TIMEOUT
+	default 500
+
+# Override default Settings configuration
+
+config SETTINGS_DYNAMIC_HANDLERS
+	default n
+
+# Override default libc implementation choice
+
+choice LIBC_IMPLEMENTATION
+	default MINIMAL_LIBC
+	help
+	  Use minimal libc implementation to reduce memory footprint and prevent
+	  build issues.
+endchoice
+
+rsource "uarp/Kconfig"
+
+# Logger configuration
+
+module = FMNA
+module-str = FMNA
+source "${ZEPHYR_BASE}/subsys/logging/Kconfig.template.log_config"
+
+endif # FMNA

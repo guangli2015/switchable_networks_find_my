@@ -1,0 +1,17 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+menu "FMNA UARP payload writer modules"
+
+rsource "util/Kconfig"
+
+rsource "mcuboot/Kconfig"
+
+module = FMNA_UARP_WRITER
+module-str = fmna_uarp_writer
+source "subsys/logging/Kconfig.template.log_config"
+
+endmenu

@@ -1,0 +1,17 @@
+
+#
+# Copyright (c) 2024 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+config FMNA_UARP_WRITER_UTIL_NVM
+	bool "NVM management utility used by defined FMNA UARP payload writers"
+	select FLASH_MAP
+	select STREAM_FLASH
+	select DFU_TARGET
+	select DFU_TARGET_STREAM
+
+module = FMNA_UARP_WRITER_UTIL_NVM
+module-str = fmna_uarp_writer_util_nvm
+source "subsys/logging/Kconfig.template.log_config"

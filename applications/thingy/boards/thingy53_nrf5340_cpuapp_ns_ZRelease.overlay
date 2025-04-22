@@ -1,0 +1,11 @@
+/*
+ * Copyright (c) 2024 Nordic Semiconductor ASA
+ *
+ * SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+ */
+
+#include "thingy53_nrf5340_cpuapp_common.overlay"
+
+&board_cdc_acm_uart {
+	status = "disabled";
+};

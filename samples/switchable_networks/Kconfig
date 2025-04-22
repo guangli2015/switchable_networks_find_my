@@ -1,0 +1,24 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+menu "Switchable Networks sample"
+
+rsource "src/dfu/Kconfig"
+
+config APP_NETWORK_BT_ID
+	int "Bluetooth identity used by the selected network"
+	default 1
+	help
+	  Select the Bluetooth identity used for the networks.
+	  When choosing the network, the Bluetooth identity shall be used only
+	  for the selected network. When switching the network, this Bluetooth
+	  identity must be reset using the bt_id_reset to ensure that there
+	  will be no persistent data left from the previous network.
+	  The Bluetooth identity must be smaller than BT_ID_MAX.
+
+endmenu
+
+source "Kconfig.zephyr"

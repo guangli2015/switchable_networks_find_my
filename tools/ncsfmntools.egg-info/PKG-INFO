@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: ncsfmntools
+Version: 0.7.0
+Requires-Python: >=3.12
+Requires-Dist: intelhex~=2.3.0
+Requires-Dist: pynrfjprog>=10.23.5,~=10.23
+Dynamic: requires-dist
+Dynamic: requires-python

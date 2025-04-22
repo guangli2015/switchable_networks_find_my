@@ -1,0 +1,36 @@
+#
+# Copyright (c) 2025 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+config APP_DFU
+	bool "Enable MCUmgr OTA DFU over Bluetooth"
+	select NCS_SAMPLE_MCUMGR_BT_OTA_DFU
+	select MCUMGR_MGMT_NOTIFICATION_HOOKS
+	select MCUMGR_GRP_IMG_STATUS_HOOKS
+	depends on BOOTLOADER_MCUBOOT
+	help
+	  Enable support for Device Firmware Update (DFU) over MCUmgr & SMP BT.
+
+config APP_DFU_BT_ID
+	int "Bluetooth identity used by the DFU module"
+	default 0
+	help
+	  Select the Bluetooth identity used for the DFU.
+	  The Bluetooth identity must be smaller than BT_ID_MAX.
+
+if APP_DFU
+
+config MCUMGR_TRANSPORT_BT_DYNAMIC_SVC_REGISTRATION
+	default n
+
+# Do not allow for settings erase through MCUmgr.
+# It prevents the accidental erasure of the Apple Find My provisioning data.
+config MCUMGR_GRP_ZBASIC
+	default n
+
+config MCUMGR_GRP_ZBASIC_STORAGE_ERASE
+	default n
+
+endif # APP_DFU

@@ -1,0 +1,25 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+config FMNA_UARP_PAYLOAD_MCUBOOT_APP
+	bool "MCUboot application image payload"
+	depends on BOOTLOADER_MCUBOOT
+	depends on MCUBOOT_BOOTLOADER_MODE_SWAP_WITHOUT_SCRATCH || \
+		   MCUBOOT_BOOTLOADER_MODE_SWAP_SCRATCH
+	default y
+	select FMNA_UARP_WRITER_MCUBOOT
+
+if FMNA_UARP_PAYLOAD_MCUBOOT_APP
+
+config FMNA_UARP_PAYLOAD_MCUBOOT_APP_S0_4CC_TAG
+	string "Application MCUboot primary slot (s0) image 4CC tag"
+	default "FWUP"
+	help
+	  Payload 4CC Tag of a payload containing MCUboot primary slot image
+	  for FW update.
+	  It must be four characters long.
+
+endif # FMNA_UARP_PAYLOAD_MCUBOOT_APP

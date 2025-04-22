@@ -1,0 +1,12 @@
+# CODEOWNERS for autoreview assigning in github
+
+# https://help.github.com/en/articles/about-code-owners#codeowners-syntax
+# Order is important; the last matching pattern takes the most
+# precedence.
+
+# All files
+*                                         @kapi-no @mkapala-nordic
+
+# All documentation related files
+*.rst                                     @peknis @kapi-no @mkapala-nordic
+doc/*                                     @peknis @kapi-no @mkapala-nordic

@@ -1,0 +1,14 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor ASA
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+config NRF_DEFAULT_IPC_RADIO
+	default y if SOC_NRF5340_CPUAPP || SOC_NRF54H20_CPUAPP
+
+choice BOOTLOADER
+	default BOOTLOADER_MCUBOOT if !SOC_NRF54H20_CPUAPP
+endchoice
+
+source "${ZEPHYR_BASE}/share/sysbuild/Kconfig"

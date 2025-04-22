@@ -1,0 +1,31 @@
+sample:
+  name: Find My Thingy
+  description: Find My Thingy application
+tests:
+  application.find_my.thingy.release:
+    sysbuild: true
+    build_only: true
+    platform_allow:
+      - thingy53/nrf5340/cpuapp
+      - thingy53/nrf5340/cpuapp/ns
+    integration_platforms:
+      - thingy53/nrf5340/cpuapp
+      - thingy53/nrf5340/cpuapp/ns
+    tags:
+      - ci_build
+      - sysbuild
+      - find_my
+    extra_args: FILE_SUFFIX=ZRelease
+  application.find_my.thingy.debug:
+    sysbuild: true
+    build_only: true
+    platform_allow:
+      - thingy53/nrf5340/cpuapp
+      - thingy53/nrf5340/cpuapp/ns
+    integration_platforms:
+      - thingy53/nrf5340/cpuapp
+      - thingy53/nrf5340/cpuapp/ns
+    tags:
+      - ci_build
+      - sysbuild
+      - find_my

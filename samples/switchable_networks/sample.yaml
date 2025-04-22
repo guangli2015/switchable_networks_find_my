@@ -1,0 +1,35 @@
+sample:
+  name: Switchable Networks
+  description: Switchable Networks sample
+tests:
+  sample.find_my.switchable_networks.release:
+    sysbuild: true
+    build_only: true
+    platform_allow:
+      - nrf52833dk/nrf52833
+      - nrf52840dk/nrf52840
+      - nrf54l15dk/nrf54l15/cpuapp
+    integration_platforms:
+      - nrf52833dk/nrf52833
+      - nrf52840dk/nrf52840
+      - nrf54l15dk/nrf54l15/cpuapp
+    tags:
+      - ci_build
+      - sysbuild
+      - find_my
+    extra_args: FILE_SUFFIX=ZRelease
+  sample.find_my.switchable_networks.debug:
+    sysbuild: true
+    build_only: true
+    platform_allow:
+      - nrf52833dk/nrf52833
+      - nrf52840dk/nrf52840
+      - nrf54l15dk/nrf54l15/cpuapp
+    integration_platforms:
+      - nrf52833dk/nrf52833
+      - nrf52840dk/nrf52840
+      - nrf54l15dk/nrf54l15/cpuapp
+    tags:
+      - ci_build
+      - sysbuild
+      - find_my

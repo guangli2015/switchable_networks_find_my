@@ -1,0 +1,2 @@
+[console_scripts]
+ncsfmntools = ncsfmntools.scripts.cli:cli

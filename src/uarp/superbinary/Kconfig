@@ -1,0 +1,16 @@
+#
+# Copyright (c) 2024 Nordic Semiconductor
+#
+# SPDX-License-Identifier: LicenseRef-Nordic-4-Clause
+#
+
+config FMNA_UARP_SUPERBINARY_VERSION
+	bool
+	depends on BOOTLOADER_MCUBOOT
+	select STREAM_FLASH
+	select IMG_MANAGER
+	default y
+	help
+	  Use a UARP SuperBinary version as the FMNA firmware version.
+	  It is assumed that the UARP SuperBinary version is equal to the
+	  firmware version of the currently running main image.
