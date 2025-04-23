@@ -199,7 +199,7 @@ extern  int factory_reset_perform_apple(void);
 int app_network_selector_set(enum app_network_selector network)
 {
 // add by andrew
-#if 0
+#if 1
 	__ASSERT_NO_MSG(initialized);
 	LOG_INF("app_network_selector_set###");
 	if (network >= APP_NETWORK_SELECTOR_COUNT) {
@@ -221,8 +221,8 @@ int app_network_selector_set(enum app_network_selector network)
 
 	return network_selector_set(network, false);
 #endif
-factory_reset_perform_apple();
-factory_reset_reboot();
+//factory_reset_perform_apple();
+//factory_reset_reboot();
 return 0;
 }
 extern void app_network_apple_run(void);
@@ -241,15 +241,26 @@ void app_network_selector_launch(void)
 
 	desc->launch();
 #endif
-	app_network_apple_run();
-	app_network_google_run();
+	if(APP_NETWORK_SELECTOR_UNSELECTED == current_network.id)
+	{
+		app_network_apple_run();
+		app_network_google_run();
+	}
+	else if(APP_NETWORK_SELECTOR_APPLE == current_network.id)
+	{
+		app_network_apple_run();
+	}
+	else if(APP_NETWORK_SELECTOR_GOOGLE == current_network.id)
+	{
+		app_network_google_run();
+	}
 }
 
 int app_network_selector_init(void)
 {
 	int err;
 // add by andrew
-#if 0	
+	
 	__ASSERT_NO_MSG(!initialized);
 	__ASSERT_NO_MSG(atomic_get(&settings_loaded));
 	LOG_INF("app_network_selector_init###");
@@ -271,7 +282,7 @@ int app_network_selector_init(void)
 
 		return 0;
 	}
-
+#if 1
 	if (current_network.reset_in_progress) {
 		LOG_WRN("Network Selector: Factory reset has been interrupted, retrying");
 		err = factory_reset_run();

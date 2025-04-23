@@ -9,7 +9,7 @@
 #include "fmna_conn.h"
 #include "fmna_state.h"
 #include "fmna_gatt_fmns.h"
-
+//#include "app_network_selector.h"
 #include <zephyr/sys/util.h>
 
 #include <zephyr/logging/log.h>
@@ -166,13 +166,37 @@ static enum bt_security_err pairing_accept(
 static struct bt_conn_auth_cb auth_cb = {
 	.pairing_accept = pairing_accept,
 };
+extern int google_adv_stop(void);
+enum app_network_selector {
+	/** Selector for the unselected network. */
+	APP_NETWORK_SELECTOR_UNSELECTED,
 
+	/** Selector for the Apple Find My network. */
+	APP_NETWORK_SELECTOR_APPLE,
+
+	/** Selector for the Google Find My Device network. */
+	APP_NETWORK_SELECTOR_GOOGLE,
+
+	/* New networks can be added here. */
+
+	/** Number of available networks. */
+	APP_NETWORK_SELECTOR_COUNT,
+};
+extern int app_network_selector_set(enum app_network_selector network);
+bool execute_once =false;
 static void connected(struct bt_conn *conn, uint8_t conn_err)
 {
 	int err;
 	char addr[BT_ADDR_LE_STR_LEN];
 	struct fmna_conn *fmna_conn = &conns[bt_conn_index(conn)];
-
+	LOG_INF("connected_apple######");
+	if(false == execute_once)
+	{
+		app_network_selector_set(APP_NETWORK_SELECTOR_APPLE);
+		google_adv_stop();
+		execute_once =true;
+		
+	}
 	if (!fmna_state_is_enabled()) {
 		return;
 	}

@@ -327,7 +327,29 @@ static int fp_adv_set_setup(void)
 
 	return 0;
 }
+int google_adv_stop(void)
+{
+	int err;
 
+	//__ASSERT(fp_adv_set, "Fast Pair: invalid state of the advertising set");
+	LOG_INF("google_adv_stop######");
+	err = bt_le_ext_adv_stop(fp_adv_set);
+	if (err) {
+		LOG_ERR("Fast Pair: cannot stop advertising (err: %d)", err);
+		return err;
+	}
+
+	err = bt_le_ext_adv_delete(fp_adv_set);
+	if (err) {
+		LOG_ERR("Fast Pair: bt_le_ext_adv_delete returned error: %d", err);
+		return err;
+	}
+
+	fp_adv_set = NULL;
+	
+
+	return 0;
+}
 static int fp_adv_set_teardown(void)
 {
 	int err;
