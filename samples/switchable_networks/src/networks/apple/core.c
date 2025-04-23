@@ -191,7 +191,8 @@ static bool gatt_authorize(struct bt_conn *conn, const struct bt_gatt_attr *attr
 	if (IS_ENABLED(CONFIG_APP_DFU)) {
 		authorized = authorized && app_dfu_bt_gatt_operation_allow(attr->uuid);
 	}
-
+// add by andrew
+#if 1
 	struct bt_conn_info info;
     int err = bt_conn_get_info(conn, &info);
     if (err) {
@@ -201,10 +202,14 @@ static bool gatt_authorize(struct bt_conn *conn, const struct bt_gatt_attr *attr
 
     uint8_t adv_id = info.id;
 	if(adv_id == 0)
-	{
+	{LOG_INF("gatt_authorize_googleconfig###");
 		authorized = authorized && identifying_info_allow(conn, attr->uuid);
 	}
-
+	else
+	{
+		LOG_INF("gatt_authorize_appleconfig###");
+	}
+#endif
 	return authorized;
 }
 

@@ -198,6 +198,7 @@ static int factory_reset_run(void)
 extern  int factory_reset_perform_apple(void);
 int app_network_selector_set(enum app_network_selector network)
 {
+// add by andrew
 #if 0
 	__ASSERT_NO_MSG(initialized);
 	LOG_INF("app_network_selector_set###");
@@ -228,6 +229,7 @@ extern void app_network_apple_run(void);
 extern void app_network_google_run(void);
 void app_network_selector_launch(void)
 {
+// add by andrew
 #if 0
 	__ASSERT_NO_MSG(initialized);
 	LOG_INF("app_network_selector_launch###");
@@ -246,6 +248,7 @@ void app_network_selector_launch(void)
 int app_network_selector_init(void)
 {
 	int err;
+// add by andrew
 #if 0	
 	__ASSERT_NO_MSG(!initialized);
 	__ASSERT_NO_MSG(atomic_get(&settings_loaded));

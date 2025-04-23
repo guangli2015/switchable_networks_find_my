@@ -676,13 +676,14 @@ static void init_work_handle(struct k_work *work)
 		LOG_ERR("Registering authentication callbacks failed (err %d)", err);
 		return;
 	}
-/*
+// add by andrew
+#if 0
 	err = bt_gatt_authorization_cb_register(&gatt_authorization_callbacks);
 	if (err) {
 		LOG_ERR("Registering GATT authorization callbacks failed (err %d)", err);
 		return;
 	}
-*/
+#endif
 	err = app_ring_init();
 	if (err) {
 		LOG_ERR("FMDN: app_ring_init failed (err %d)", err);
