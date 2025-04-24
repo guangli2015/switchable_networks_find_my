@@ -183,7 +183,7 @@ enum app_network_selector {
 	APP_NETWORK_SELECTOR_COUNT,
 };
 extern int app_network_selector_set(enum app_network_selector network);
-bool execute_once =false;
+static bool execute_once =false;
 static void connected(struct bt_conn *conn, uint8_t conn_err)
 {
 	int err;

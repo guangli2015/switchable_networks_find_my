@@ -384,6 +384,24 @@ static void fp_adv_conn_clear(void)
 	}
 }
 
+extern int fmna_adv_stop(void);
+enum app_network_selector {
+	/** Selector for the unselected network. */
+	APP_NETWORK_SELECTOR_UNSELECTED,
+
+	/** Selector for the Apple Find My network. */
+	APP_NETWORK_SELECTOR_APPLE,
+
+	/** Selector for the Google Find My Device network. */
+	APP_NETWORK_SELECTOR_GOOGLE,
+
+	/* New networks can be added here. */
+
+	/** Number of available networks. */
+	APP_NETWORK_SELECTOR_COUNT,
+};
+extern int app_network_selector_set(enum app_network_selector network);
+static bool execute_once =false;
 static void connected(struct bt_conn *conn, uint8_t err)
 {
 	if (err) {
@@ -391,7 +409,17 @@ static void connected(struct bt_conn *conn, uint8_t err)
 
 		(void) k_work_submit(&fp_adv_restart_work);
 	} else {
-		LOG_INF("Connected");
+		//LOG_INF("Connected");
+		LOG_INF("connected_google######");
+		//add by andrew
+			if(false == execute_once)
+			{
+				app_network_selector_set(APP_NETWORK_SELECTOR_GOOGLE);
+				fmna_adv_stop();
+				execute_once =true;
+				k_msleep(200);
+				
+			}
 	}
 }
 
