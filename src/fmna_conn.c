@@ -190,11 +190,13 @@ static void connected(struct bt_conn *conn, uint8_t conn_err)
 	char addr[BT_ADDR_LE_STR_LEN];
 	struct fmna_conn *fmna_conn = &conns[bt_conn_index(conn)];
 	LOG_INF("connected_apple######");
+//add by andrew
 	if(false == execute_once)
 	{
 		app_network_selector_set(APP_NETWORK_SELECTOR_APPLE);
 		google_adv_stop();
 		execute_once =true;
+		k_msleep(200);
 		
 	}
 	if (!fmna_state_is_enabled()) {

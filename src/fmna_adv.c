@@ -200,7 +200,7 @@ static int bt_ext_advertising_start(const struct adv_start_config *config)
 
 	return err;
 }
-
+extern  void factory_reset_reboot(void);
 static int id_addr_reconfigure(bt_addr_le_t *addr)
 {
 	int ret;
@@ -212,6 +212,7 @@ static int id_addr_reconfigure(bt_addr_le_t *addr)
 		return 0;
 	} else if (ret < 0) {
 		LOG_ERR("bt_id_reset returned error: %d", ret);
+		factory_reset_reboot();
 		return ret;
 	}
 

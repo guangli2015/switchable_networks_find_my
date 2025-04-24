@@ -154,7 +154,7 @@ struct app_network_selector_desc *network_find(enum app_network_selector network
 	return NULL;
 }
 
-static void factory_reset_reboot(void)
+ void factory_reset_reboot(void)
 {
 	LOG_INF("Network Selector: Factory reset finalized, "
 		"rebooting to the network selector...");
@@ -241,6 +241,7 @@ void app_network_selector_launch(void)
 
 	desc->launch();
 #endif
+#if 1
 	if(APP_NETWORK_SELECTOR_UNSELECTED == current_network.id)
 	{
 		app_network_apple_run();
@@ -254,6 +255,7 @@ void app_network_selector_launch(void)
 	{
 		app_network_google_run();
 	}
+#endif
 }
 
 int app_network_selector_init(void)
