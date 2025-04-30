@@ -62,7 +62,7 @@ static const char *network_name_get(enum app_network_selector network)
 static int network_settings_load(size_t len, settings_read_cb read_cb, void *cb_arg)
 {
 	int rc;
-	LOG_INF("network_settings_load###");
+
 	if (len != sizeof(current_network)) {
 		return -EINVAL;
 	}
@@ -85,8 +85,8 @@ static int network_selector_settings_set(const char *name,
 				void *cb_arg)
 {
 	int err;
-	LOG_INF("network_selector_settings_set###");
-	LOG_INF("Network Selector: the 'network' node is being set by Settings %s",name);
+
+	LOG_DBG("Network Selector: the 'network' node is being set by Settings");
 
 	if (!strncmp(name,
 		     SETTINGS_NETWORK_SELECTOR_KEY_NAME,
@@ -100,9 +100,8 @@ static int network_selector_settings_set(const char *name,
 	 * In case of -ENOENT, the module will initialize to APP_NETWORK_SELECTOR_UNSELECTED
 	 * on init.
 	 */
-	
 	settings_rc = err;
-	LOG_INF("network_selector_settings_set settings_rc %d###",settings_rc);
+
 	return 0;
 }
 
@@ -117,7 +116,7 @@ static int network_selector_set(enum app_network_selector network, bool reset_in
 {
 	int err;
 	struct network_desc desc = {0};
-	LOG_INF("network_selector_set###");
+
 	desc.id = network;
 	desc.reset_in_progress = reset_in_progress;
 
@@ -138,14 +137,13 @@ static int reset_in_progress_set(bool in_progress)
 {
 	enum app_network_selector network = in_progress ?
 		current_network.id : APP_NETWORK_SELECTOR_UNSELECTED;
-	LOG_INF("reset_in_progress_set###");
+
 	return network_selector_set(network, in_progress);
 }
 
 struct app_network_selector_desc *network_find(enum app_network_selector network)
 {
 	STRUCT_SECTION_FOREACH(app_network_selector_desc, desc) {
-		LOG_INF("network_find %s###",network_name_get(desc->network));
 		if (desc->network == network) {
 			return desc;
 		}
@@ -153,12 +151,15 @@ struct app_network_selector_desc *network_find(enum app_network_selector network
 
 	return NULL;
 }
-
+uint32_t current_network_id_get()
+{
+	return current_network.id;
+}
  void factory_reset_reboot(void)
 {
 	LOG_INF("Network Selector: Factory reset finalized, "
 		"rebooting to the network selector...");
-	LOG_INF("factory_reset_reboot###");
+
 	sys_reboot(SYS_REBOOT_COLD);
 
 	/* Should not reach. */
@@ -170,7 +171,7 @@ static int factory_reset_run(void)
 	int err;
 	enum app_network_selector network = current_network.id;
 	struct app_network_selector_desc *desc = network_find(network);
-	LOG_INF("factory_reset_run###");
+
 	__ASSERT_NO_MSG(desc);
 
 	err = reset_in_progress_set(true);
@@ -195,13 +196,11 @@ static int factory_reset_run(void)
 
 	return 0;
 }
-extern  int factory_reset_perform_apple(void);
+
 int app_network_selector_set(enum app_network_selector network)
 {
-// add by andrew
-#if 1
 	__ASSERT_NO_MSG(initialized);
-	LOG_INF("app_network_selector_set###");
+
 	if (network >= APP_NETWORK_SELECTOR_COUNT) {
 		LOG_ERR("Network Selector: Invalid network value");
 		return -EINVAL;
@@ -220,10 +219,6 @@ int app_network_selector_set(enum app_network_selector network)
 	}
 
 	return network_selector_set(network, false);
-#endif
-//factory_reset_perform_apple();
-//factory_reset_reboot();
-return 0;
 }
 extern void app_network_apple_run(void);
 extern void app_network_google_run(void);
@@ -261,11 +256,10 @@ void app_network_selector_launch(void)
 int app_network_selector_init(void)
 {
 	int err;
-// add by andrew
-	
+
 	__ASSERT_NO_MSG(!initialized);
 	__ASSERT_NO_MSG(atomic_get(&settings_loaded));
-	LOG_INF("app_network_selector_init###");
+
 	if ((settings_rc != 0) && (settings_rc != -ENOENT)) {
 		LOG_ERR("Network Selector: Settings loading failed (err %d)", settings_rc);
 		return settings_rc;
@@ -284,7 +278,7 @@ int app_network_selector_init(void)
 
 		return 0;
 	}
-#if 1
+
 	if (current_network.reset_in_progress) {
 		LOG_WRN("Network Selector: Factory reset has been interrupted, retrying");
 		err = factory_reset_run();
@@ -293,7 +287,7 @@ int app_network_selector_init(void)
 			return err;
 		}
 	}
-#endif
+
 	initialized = true;
 
 	return 0;

@@ -151,6 +151,7 @@ static enum bt_security_err pairing_accept(
 	struct bt_conn *conn,
 	const struct bt_conn_pairing_feat * const feat)
 {
+
 	ARG_UNUSED(feat);
 
 	__ASSERT(fmna_conn_check(conn), "FMNA identity is expected!");
@@ -182,21 +183,24 @@ enum app_network_selector {
 	/** Number of available networks. */
 	APP_NETWORK_SELECTOR_COUNT,
 };
+extern  void factory_reset_reboot(void);
+extern uint32_t current_network_id_get();
 extern int app_network_selector_set(enum app_network_selector network);
-static bool execute_once =false;
+//static bool execute_once =false;
 static void connected(struct bt_conn *conn, uint8_t conn_err)
 {
 	int err;
 	char addr[BT_ADDR_LE_STR_LEN];
 	struct fmna_conn *fmna_conn = &conns[bt_conn_index(conn)];
-	LOG_INF("connected_apple######");
+	LOG_INF("######connected_apple######");
 //add by andrew
-	if(false == execute_once)
+	if(0 == current_network_id_get())
 	{
-		app_network_selector_set(APP_NETWORK_SELECTOR_APPLE);
-		google_adv_stop();
-		execute_once =true;
-		k_msleep(200);
+		//app_network_selector_set(APP_NETWORK_SELECTOR_APPLE);
+		//factory_reset_reboot();
+		//google_adv_stop();
+		//execute_once =true;
+		//k_msleep(200);
 		
 	}
 	if (!fmna_state_is_enabled()) {

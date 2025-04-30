@@ -56,7 +56,7 @@ static enum app_network_selector network = APP_NETWORK_SELECTOR_UNSELECTED;
 static void ui_request_handle(union app_ui_request request)
 {
 	__ASSERT_NO_MSG(network == APP_NETWORK_SELECTOR_UNSELECTED);
-	LOG_INF("ui_request_handle###");
+
 	if (IS_ENABLED(CONFIG_APP_DFU) && !app_dfu_is_confirmed()) {
 		LOG_WRN("Network selection is disabled, waiting for the image confirmation");
 		return;
@@ -78,7 +78,7 @@ static int factory_reset_perform(void)
 	 * There is no way to leave unselected network beside choosing
 	 * one of the available networks.
 	 */
-	LOG_INF("factory_reset_perform###");
+
 	return 0;
 }
 
@@ -192,7 +192,7 @@ static void init_work_handle(struct k_work *work)
 static void selected_work_handle(struct k_work *work)
 {
 	union app_ui_state state = {.unselected = APP_UI_UNSELECTED_STATE_SELECTION_MENU};
-	LOG_INF("selected_work_handle###");
+
 	app_ui_state_change_indicate(state, false);
 
 	if (IS_ENABLED(CONFIG_APP_DFU)) {
@@ -209,7 +209,7 @@ void app_network_unselected_run(void)
 {
 	int err;
 	union app_ui_state state = {.unselected = APP_UI_UNSELECTED_STATE_SELECTION_MENU};
-	LOG_INF("app_network_unselected_run###");
+
 	(void) k_work_submit(&init_work);
 	err = k_sem_take(&init_work_sem, K_SECONDS(INIT_SEM_TIMEOUT));
 	if (err) {

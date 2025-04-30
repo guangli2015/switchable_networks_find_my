@@ -112,7 +112,7 @@ static void fmdn_factory_reset_executed(void)
 	factory_reset_executed = true;
 }
 
-static int factory_reset_perform_google(void)
+static int factory_reset_perform(void)
 {
 	int ret;
 
@@ -172,12 +172,13 @@ static enum bt_security_err pairing_accept(struct bt_conn *conn,
 	ARG_UNUSED(conn);
 	ARG_UNUSED(feat);
 
+
 	/* Fast Pair Implementation Guidelines for the locator tag use case:
 	 * Provider should reject normal Bluetooth pairing attempts. It should
 	 * only accept Fast Pair pairing.
 	 */
 
-	LOG_INF("Normal Bluetooth pairing not allowed");
+	LOG_WRN("Normal Bluetooth pairing not allowed");
 
 	return BT_SECURITY_ERR_PAIR_NOT_ALLOWED;
 }
@@ -260,6 +261,26 @@ static bool gatt_authorize(struct bt_conn *conn, const struct bt_gatt_attr *attr
 	}
 
 	authorized = authorized && identifying_info_allow(conn, attr->uuid);
+
+	// add by andrew
+#if 0
+	struct bt_conn_info info;
+    int err = bt_conn_get_info(conn, &info);
+    if (err) {
+        LOG_ERR("Failed to get conn info: %d", err);
+        return -EACCES;
+    }
+
+    uint8_t adv_id = info.id;
+	if(adv_id == 0)
+	{LOG_INF("gatt_authorize_googleconfig###");
+		authorized = authorized && identifying_info_allow(conn, attr->uuid);
+	}
+	else
+	{
+		LOG_INF("gatt_authorize_appleconfig###");
+	}
+#endif
 
 	return authorized;
 }
@@ -647,7 +668,7 @@ static int dfu_init(void)
 
 	return 0;
 }
-
+extern bool authorization_cb_registered;
 static void init_work_handle(struct k_work *work)
 {
 	int err;
@@ -677,13 +698,16 @@ static void init_work_handle(struct k_work *work)
 		return;
 	}
 // add by andrew
-#if 0
-	err = bt_gatt_authorization_cb_register(&gatt_authorization_callbacks);
-	if (err) {
-		LOG_ERR("Registering GATT authorization callbacks failed (err %d)", err);
-		return;
+if( authorization_cb_registered == false)
+	{
+		err = bt_gatt_authorization_cb_register(&gatt_authorization_callbacks);
+		if (err) {
+			LOG_ERR("Registering GATT authorization callbacks failed (err %d)", err);
+			return;
+		}
+		authorization_cb_registered = true;
 	}
-#endif
+
 	err = app_ring_init();
 	if (err) {
 		LOG_ERR("FMDN: app_ring_init failed (err %d)", err);
@@ -749,4 +773,4 @@ APP_UI_REQUEST_LISTENER_REGISTER(ui_network_google,
 APP_NETWORK_SELECTOR_DESC_REGISTER(network_google,
 				   APP_NETWORK_SELECTOR_GOOGLE,
 				   app_network_google_run,
-				   factory_reset_perform_google);
+				   factory_reset_perform);

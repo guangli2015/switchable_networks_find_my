@@ -33,7 +33,7 @@ LOG_MODULE_DECLARE(apple, LOG_LEVEL_INF);
 #define FMNA_UT_SOUND_DURATION   K_SECONDS(1)
 
 #define FMNA_BATTERY_LEVEL 100
-
+bool authorization_cb_registered = false;
 static bool paired;
 static bool pairing_mode;
 static bool factory_reset_requested;
@@ -192,7 +192,7 @@ static bool gatt_authorize(struct bt_conn *conn, const struct bt_gatt_attr *attr
 		authorized = authorized && app_dfu_bt_gatt_operation_allow(attr->uuid);
 	}
 // add by andrew
-#if 1
+#if 0
 	struct bt_conn_info info;
     int err = bt_conn_get_info(conn, &info);
     if (err) {
@@ -218,10 +218,10 @@ static const struct bt_gatt_authorization_cb gatt_authorization_callbacks = {
 	.write_authorize = gatt_authorize,
 };
 
- int factory_reset_perform_apple(void)
+static int factory_reset_perform(void)
 {
 	int ret;
-	LOG_INF("aaple_factory_reset_perform###");
+
 	/* Pre-actions. */
 	if (IS_ENABLED(CONFIG_APP_DFU)) {
 		app_dfu_mode_exit();
@@ -419,12 +419,15 @@ static void init_work_handle(struct k_work *work)
 		return;
 	}
 
-	err = bt_gatt_authorization_cb_register(&gatt_authorization_callbacks);
-	if (err) {
-		LOG_ERR("Registering GATT authorization callbacks failed (err %d)", err);
-		return;
+	if( authorization_cb_registered == false)
+	{
+		err = bt_gatt_authorization_cb_register(&gatt_authorization_callbacks);
+		if (err) {
+			LOG_ERR("Registering GATT authorization callbacks failed (err %d)", err);
+			return;
+		}
+		authorization_cb_registered = true;
 	}
-
 	err = fmna_initialize();
 	if (err) {
 		LOG_ERR("FMNA init failed (err %d)", err);
@@ -460,4 +463,4 @@ APP_UI_REQUEST_LISTENER_REGISTER(ui_network_apple,
 APP_NETWORK_SELECTOR_DESC_REGISTER(network_apple,
 				   APP_NETWORK_SELECTOR_APPLE,
 				   app_network_apple_run,
-				   factory_reset_perform_apple);
+				   factory_reset_perform);

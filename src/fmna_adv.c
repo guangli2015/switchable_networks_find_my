@@ -74,6 +74,36 @@ union adv_payload {
 	struct separated_adv_payload separated;
 };
 
+extern  void factory_reset_reboot(void);
+enum app_network_selector {
+	/** Selector for the unselected network. */
+	APP_NETWORK_SELECTOR_UNSELECTED,
+
+	/** Selector for the Apple Find My network. */
+	APP_NETWORK_SELECTOR_APPLE,
+
+	/** Selector for the Google Find My Device network. */
+	APP_NETWORK_SELECTOR_GOOGLE,
+
+	/* New networks can be added here. */
+
+	/** Number of available networks. */
+	APP_NETWORK_SELECTOR_COUNT,
+};
+extern int app_network_selector_set(enum app_network_selector network);
+extern uint32_t current_network_id_get();
+static void apple_adv_connected(struct bt_le_ext_adv *adv, struct bt_le_ext_adv_connected_info *info)
+{
+	LOG_INF("apple_adv_connected###");
+	if(0 == current_network_id_get())
+	{
+		app_network_selector_set(APP_NETWORK_SELECTOR_APPLE);
+		factory_reset_reboot();
+	}
+}
+static const struct bt_le_ext_adv_cb apple_adv_set_cb = {
+	.connected = apple_adv_connected,
+};
 struct adv_start_config {
 	struct {
 		const struct bt_data *payload;
@@ -274,6 +304,7 @@ int fmna_adv_start_unpaired(bool change_address)
 	start_config.ad.payload = unpaired_ad;
 	start_config.ad.len = ARRAY_SIZE(unpaired_ad);
 	start_config.interval = UNPAIRED_ADV_INTERVAL;
+	start_config.cb = &apple_adv_set_cb;
 	err = bt_ext_advertising_start(&start_config);
 	if (err) {
 		LOG_ERR("bt_ext_advertising_start returned error: %d", err);
